@@ -42,11 +42,11 @@ class tCafeteria:
 		self.locale = locale
 	
 	def getDate(self):
-	#	return datetime.today().day	#오늘 날짜
-		return 12
+		return datetime.today().day	#오늘 날짜
+
 	def getMonth(self):
-	#	return datetime.today().month #달
-		return 9
+		return datetime.today().month #달
+
 	def getYear(self):
 		return datetime.today().year #연도
 	
