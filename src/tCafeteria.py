@@ -2,10 +2,10 @@
 
 # Copyright (c) 2017 w3bn00b
 # See the file LICENSE for copying permission.
-# tanbang-cafeteria v1.0
+# tanbang-cafeteria v1.1
 # author : w3bn00b
 # description : 대전 학교의 급식 정보를 파싱해옵니다
-# Usage : cafe = tCafeteria("학교코드")
+# Usage : cafe = tCafeteria("학교코드", "관할지역 코드")
 # Required library : datetime, bs4, requests
 
 from datetime import *
