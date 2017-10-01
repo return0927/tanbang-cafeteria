@@ -4,7 +4,7 @@
 
 ## Installation
 ```sh
-$ pip install -e ./tCafeteria.py
+from tCafeteria import *
 ```
 
 tanbang-cafeteria 모듈은 bs4를 필요로 합니다!
