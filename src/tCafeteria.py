@@ -12,15 +12,40 @@ from datetime import *
 from bs4 import BeautifulSoup
 import requests
 
+
+
 class tCafeteria:
-	def __init__(self, schoolcode):
-		self.schoolcode = schoolcode	#학교코드 설정
+	region = {
+		'SEOUL':'stu.sen.go.kr',
+		'INCHEON':'stu.ice.go.kr',
+		'BUSAN':'stu.pen.go.kr',
+		'GWANGJU':'stu.gen.go.kr',
+		'DAEJEON':'stu.dje.go.kr',
+		'DAEGU':'stu.dge.go.kr',
+		'SEJONG':'stu.sje.go.kr',
+		'ULSAN':'stu.use.go.kr',
+		'GYEONGGI':'stu.goe.go.kr',
+		'KANGWON':'stu.kwe.go.kr',
+		'CHUNGBUK':'stu.cbe.go.kr',
+		'CHUNGNAM':'stu.cne.go.kr',
+		'GYEONGBUK':'stu.gbe.go.kr',
+		'GYEONGNAM':'stu.gne.go.kr',
+		'JEONBUK':'stu.jbe.go.kr',
+		'JEONNAM':'stu.jne.go.kr',
+		'JEJU':'stu.jje.go.kr'
+	}
+	
+	locale = 'DAEJEON'
+	
+	def __init__(self, schoolcode, locale):
+		self.schoolcode = schoolcode #학교코드 설정
+		self.locale = locale
 	
 	def getDate(self):
 		return datetime.today().day	#오늘 날짜
 	
 	def parseCafeteria(self):
-		url = "http://stu.dje.go.kr/sts_sci_md00_001.do?schulCode="+self.schoolcode+"&schulCrseScCode=4&schulKndScCode=04&schMmealScCode=1"	#NEIS 학교급식 정보
+		url = "http://"+self.region[self.locale]+"/sts_sci_md00_001.do?schulCode="+self.schoolcode+"&schulCrseScCode=4&schulKndScCode=04&schMmealScCode=1"	#NEIS 학교급식 정보
 		r = requests.get(url)
 		soup = BeautifulSoup(r.text, "html.parser")
 		

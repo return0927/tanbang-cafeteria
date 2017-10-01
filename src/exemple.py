@@ -8,9 +8,28 @@
 # Usage : cafe = tCafeteria("학교코드")
 # Required library : datetime, bs4, requests
 
-import tCafeteria
+# 관할지역 정보
+# 'SEOUL':'stu.sen.go.kr',
+# 'INCHEON':'stu.ice.go.kr',
+# 'BUSAN':'stu.pen.go.kr',
+# 'GWANGJU':'stu.gen.go.kr',
+# 'DAEJEON':'stu.dje.go.kr',
+# 'DAEGU':'stu.dge.go.kr',
+# 'SEJONG':'stu.sje.go.kr',
+# 'ULSAN':'stu.use.go.kr',
+# 'GYEONGGI':'stu.goe.go.kr',
+# 'KANGWON':'stu.kwe.go.kr',
+# 'CHUNGBUK':'stu.cbe.go.kr',
+# 'CHUNGNAM':'stu.cne.go.kr',
+# 'GYEONGBUK':'stu.gbe.go.kr',
+# 'GYEONGNAM':'stu.gne.go.kr',
+# 'JEONBUK':'stu.jbe.go.kr',
+# 'JEONNAM':'stu.jne.go.kr',
+# 'JEJU':'stu.jje.go.kr'
 
-cafe = tCafeteria.tCafeteria("G100000479")	#탄방중 학생코드
+from tCafeteria import *
+
+cafe = tCafeteria("G100000479", 'DAEJEON')	#탄방중 학생코드, 지역
 res = cafe.parseCafeteria()
 
 w = open("./today.txt", "w")
