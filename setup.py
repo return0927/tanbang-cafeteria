@@ -17,6 +17,6 @@ setup(
    author_email='powderbanana@gmail.com',
    url='https://github.com/w3bnoob/tanbang-cafeteria',
    description="Meal and schedule crawler for korean middle school",
-   long_description=README.md,
+   long_description="README.md",
    install_requires=["requests", "bs4"],
 )
