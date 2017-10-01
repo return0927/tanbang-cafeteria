@@ -10,7 +10,7 @@ from tCafeteria import *
 tanbang-cafeteria 모듈은 bs4를 필요로 합니다!
 bs4 모듈을 설치하지 않으셨다면
 ```sh
-$ pip install bs4
+$ pip install bs4 request
 ```
 로 먼저 설치해주세요!
 ## Test code
