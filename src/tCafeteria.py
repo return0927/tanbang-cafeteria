@@ -2,9 +2,9 @@
 
 # Copyright (c) 2017 w3bn00b
 # See the file LICENSE for copying permission.
-# tanbang-cafeteria v1.2
+# tanbang-cafeteria v1.3
 # author : w3bn00b
-# description : 중학교의 급식정보와 학사일정 파싱해옵니다
+# description : 중학교의 급식정보와 학사일정을 파싱해옵니다
 # Usage : cafe = tCafeteria("학교코드", "관할지역 코드")
 # Required library : datetime, bs4, requests
 
@@ -16,7 +16,7 @@ import requests
 
 class tCafeteria:
 	locale = 'DAEJEON'
-	
+	schType = 'MIDDLE'
 	region = {
 		'SEOUL':'stu.sen.go.kr',
 		'INCHEON':'stu.ice.go.kr',
@@ -37,21 +37,29 @@ class tCafeteria:
 		'JEJU':'stu.jje.go.kr'
 	}
 	
-	def __init__(self, schoolcode, locale):
+	Type = {
+		'KINDERGARTEN':'1',	#병설유치원
+		'ELEMENTARY':'2',	#초등학교
+		'MIDDLE':'3',		#중학교
+		'HIGH':'4'			#고등학교
+	}
+	
+	def __init__(self, schoolcode, locale, schType):
 		self.schoolcode = schoolcode #학교코드 설정
 		self.locale = locale
+		self.schType = schType
 	
 	def getDate(self):
-		return datetime.today().day	#오늘 날짜
-
+	#	return datetime.today().day	#오늘 날짜
+		return 1
 	def getMonth(self):
-		return datetime.today().month #달
-
+	#	return datetime.today().month #달
+		return 9
 	def getYear(self):
 		return datetime.today().year #연도
 	
 	def parseCafeteria(self):
-		url = "http://"+self.region[self.locale]+"/sts_sci_md00_001.do?schulCode="+self.schoolcode+"&schulCrseScCode=4&schulKndScCode=04&schMmealScCode=1"	#NEIS 학교급식 정보
+		url = "http://"+self.region[self.locale]+"/sts_sci_md00_001.do?schulCode="+self.schoolcode+"&schulCrseScCode="+self.Type[self.schType]+"&schulKndScCode=0"+self.Type[self.schType]+"&schMmealScCode=1"	#NEIS 학교급식 정보
 		r = requests.get(url)
 		soup = BeautifulSoup(r.text, "html.parser")
 		
@@ -68,7 +76,8 @@ class tCafeteria:
 		return str(res[1:len(res)-1])
 	
 	def parseSchedule(self):
-		url = "http://"+self.region[self.locale]+"/sts_sci_sf00_001.do?schulCode="+str(self.schoolcode)+"&schulCrseScCode=3&schulKndScCode=03&ay="+str(self.getYear())+"&"+"mm="+str(self.getMonth())+"&"	#학사일정 링크
+		url = "http://"+self.region[self.locale]+"/sts_sci_sf00_001.do?schulCode="+self.schoolcode+"&schulCrseScCode="+self.Type[self.schType]+"&schulKndScCode=0"+self.Type[self.schType]+"&ay="+str(self.getYear())+"&"+"mm="+str(self.getMonth())+"&"	#학사일정 링크
+		print(url)
 		r = requests.get(url)	#html코드를 불러온다
 		soup = BeautifulSoup(r.text, "html.parser")
 		
@@ -78,13 +87,15 @@ class tCafeteria:
 		
 		#테그 제거
 		if res == "None":
-			res = allofsche[self.findIndex()]
+			res = str(allofsche[self.findIndex()])
 			res = res.replace('''<td class="textL"''', "")
 			res = res.replace("</td>", "")
 		else:
 			res = res.replace('''<span style="color:red">''', "")
 			res = res.replace("</span>", "")
 			res = res.replace("<span>", "")
+		res = res.replace("<", "")
+		res = res.replace(">", "")
 		return res
 		
 	def findIndex(self):	#학사일정을 저장해둔 list에 index를 계산해준다
