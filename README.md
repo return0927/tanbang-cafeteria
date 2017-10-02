@@ -19,7 +19,7 @@ $ pip install bs4 requests
 
 # Copyright (c) 2017 w3bn00b
 # See the file LICENSE for copying permission.
-# example.py v1.2
+# example.py v1.3
 # author : w3bn00b
 # description : 학교 급식 정보, 학사일정을 파싱해와 각각 meal.txt, sche.txt에 저장합니다
 # Usage : cafe = tCafeteria("학교코드", '관할지역 코드')
