@@ -27,9 +27,15 @@
 # 'JEONNAM':'stu.jne.go.kr',
 # 'JEJU':'stu.jje.go.kr'
 
+# 학교 종류
+# 'KINDERGARTEN':'1'
+# 'ELEMENTARY':'2'
+# 'MIDDLE':'3'
+# 'HIGH':'4'
+
 from tCafeteria import *
 
-cafe = tCafeteria("G100000479", 'DAEJEON')	#탄방중 학생코드, 지역
+cafe = tCafeteria("G100000479", 'DAEJEON', 'MIDDLE')	#탄방중 학교코드, 지역(대전), 학교 종류(중학교)
 res = cafe.parseCafeteria()
 w = open("./meal.txt", "w")
 meal = w.write(res)
