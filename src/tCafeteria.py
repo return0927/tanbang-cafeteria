@@ -10,8 +10,9 @@
 
 from datetime import *
 from bs4 import BeautifulSoup
-import requests
+import requests, re
 
+fetchDate = lambda: [datetime.today().year, datetime.today().month, datetime.today().day]
 
 class tCafeteria:
     locale = 'DAEJEON'
@@ -49,34 +50,78 @@ class tCafeteria:
         self.schType = schType
 
     def getDate(self):
-        #	return datetime.today().day	#오늘 날짜
-        return 1
+        return datetime.today().day
 
     def getMonth(self):
-        #	return datetime.today().month #달
-        return 9
+        return datetime.today().month
 
     def getYear(self):
         return datetime.today().year  # 연도
 
-    def parseCafeteria(self):
-        url = "http://" + self.region[
-            self.locale] + "/sts_sci_md00_001.do?schulCode=" + self.schoolcode + "&schulCrseScCode=" + self.Type[
-                  self.schType] + "&schulKndScCode=0" + self.Type[self.schType] + "&schMmealScCode=1"  # NEIS 학교급식 정보
-        r = requests.get(url)
+    def makeValue(self, tag):
+        _TEMP = str(tag)[5:-6].split("<br/>")
+
+        if "[석식]" in _TEMP[1:]:
+            _INDEX = _TEMP[1:].index("[석식]")
+            _Lunch = _TEMP[1:][:_INDEX]
+            _Dinner = _TEMP[1:][_INDEX:]
+            return {
+                "Date": _TEMP[0],
+                "Data": [
+                    {
+                        "type": "Lun",
+                        "data": _Lunch[1:]
+                    },
+                    {
+                        "type": "Din",
+                        "data": _Dinner[1:]
+                     }
+                ]
+            }
+        else:
+            return {
+                "Date": _TEMP[0],
+                "Data": [
+                    {
+                        "type": "Lun",
+                        "data": _TEMP[1:][1:]
+                    }
+                ]
+            }
+
+        #return {"Date": _TEMP[0], "Data":""}
+
+    def parseCafeteria(self, date=fetchDate() ):
+        """
+            function arguments:
+            - date (Default: Now timestamp)
+
+            : `date` arg type formation
+            ['yyyy','m or mm','d or dd']
+        """
+
+        _YEAR, _MONTH, _DAY = date
+        try:
+            url = "http://" + self.region[self.locale]\
+                  + "/sts_sci_md00_001.do?schulCode="\
+                  + self.schoolcode + "&schulCrseScCode="\
+                  + self.Type[self.schType]\
+                  + "&schulKndScCode=0"\
+                  + self.Type[self.schType]\
+                  + "&schMmealScCode=1"  # NEIS 학교급식 정보
+            r = requests.get(url)
+        except:
+            raise Exception("Error on getting server information")
+        print(url)
         soup = BeautifulSoup(r.text, "html.parser")
 
-        allofcafe = soup.find(id="contents")  # id가 content인 부분을 return
-        table = soup.find("table")  # table 태그부분을 return
-        tbody = table.find("tbody")  # tbody만 return
-        td = tbody.find_all("td")  # td(급식메뉴)속 값을 list로 받음
-        div = td[self.getDate() - 1].find_all("div")  # 오늘의 급식
+        try:
+            res = soup.select("#contents > div > table > tbody > tr > td > div")
+            res = [ {"Date":tag.text, "Data":None} if tag.find("br") is None else self.makeValue(tag) for tag in res ]
+        except:
+            raise Exception("Error on parsing data")
 
-        res = str(div)
-        res = res.replace("<div>", "")  # 태그 제거
-        res = res.replace("</div>", "")
-        res = res.replace("<br/>", "\n")
-        return str(res[1:len(res) - 1])
+        return res
 
     def parseSchedule(self):
         url = "http://" + self.region[
