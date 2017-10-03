@@ -110,5 +110,5 @@ class tCafeteria:
                 return (self.getMonth() - 9) + (self.getDate() - 1) * 6
             if self.getMonth() <= 2:
                 return (self.getMonth() + 3) + (self.getDate() - 1) * 6
-        if self.getMonth() >= 3 or self.getMonth <= 8:
+        if self.getMonth() >= 3 or self.getMonth() <= 8:
             return (self.getMonth() - 6) + (self.getDate() - 1) * 6
