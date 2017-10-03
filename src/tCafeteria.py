@@ -13,96 +13,102 @@ from bs4 import BeautifulSoup
 import requests
 
 
-
 class tCafeteria:
-	locale = 'DAEJEON'
-	schType = 'MIDDLE'
-	region = {
-		'SEOUL':'stu.sen.go.kr',
-		'INCHEON':'stu.ice.go.kr',
-		'BUSAN':'stu.pen.go.kr',
-		'GWANGJU':'stu.gen.go.kr',
-		'DAEJEON':'stu.dje.go.kr',
-		'DAEGU':'stu.dge.go.kr',
-		'SEJONG':'stu.sje.go.kr',
-		'ULSAN':'stu.use.go.kr',
-		'GYEONGGI':'stu.goe.go.kr',
-		'KANGWON':'stu.kwe.go.kr',
-		'CHUNGBUK':'stu.cbe.go.kr',
-		'CHUNGNAM':'stu.cne.go.kr',
-		'GYEONGBUK':'stu.gbe.go.kr',
-		'GYEONGNAM':'stu.gne.go.kr',
-		'JEONBUK':'stu.jbe.go.kr',
-		'JEONNAM':'stu.jne.go.kr',
-		'JEJU':'stu.jje.go.kr'
-	}
-	
-	Type = {
-		'KINDERGARTEN':'1',	#병설유치원
-		'ELEMENTARY':'2',	#초등학교
-		'MIDDLE':'3',		#중학교
-		'HIGH':'4'			#고등학교
-	}
-	
-	def __init__(self, schoolcode, locale, schType):
-		self.schoolcode = schoolcode #학교코드 설정
-		self.locale = locale
-		self.schType = schType
-	
-	def getDate(self):
-	#	return datetime.today().day	#오늘 날짜
-		return 1
-	def getMonth(self):
-	#	return datetime.today().month #달
-		return 9
-	def getYear(self):
-		return datetime.today().year #연도
-	
-	def parseCafeteria(self):
-		url = "http://"+self.region[self.locale]+"/sts_sci_md00_001.do?schulCode="+self.schoolcode+"&schulCrseScCode="+self.Type[self.schType]+"&schulKndScCode=0"+self.Type[self.schType]+"&schMmealScCode=1"	#NEIS 학교급식 정보
-		r = requests.get(url)
-		soup = BeautifulSoup(r.text, "html.parser")
-		
-		allofcafe = soup.find(id="contents")	#id가 content인 부분을 return
-		table = soup.find("table")				#table 태그부분을 return
-		tbody = table.find("tbody")				#tbody만 return
-		td = tbody.find_all("td")				#td(급식메뉴)속 값을 list로 받음
-		div = td[self.getDate() - 1].find_all("div")	#오늘의 급식
-		
-		res = str(div)
-		res = res.replace("<div>", "")			#태그 제거
-		res = res.replace("</div>", "")
-		res = res.replace("<br/>", "\n")
-		return str(res[1:len(res)-1])
-	
-	def parseSchedule(self):
-		url = "http://"+self.region[self.locale]+"/sts_sci_sf00_001.do?schulCode="+self.schoolcode+"&schulCrseScCode="+self.Type[self.schType]+"&schulKndScCode=0"+self.Type[self.schType]+"&ay="+str(self.getYear())+"&"+"mm="+str(self.getMonth())+"&"	#학사일정 링크
-		print(url)
-		r = requests.get(url)	#html코드를 불러온다
-		soup = BeautifulSoup(r.text, "html.parser")
-		
-		allofsche = soup.find_all("td", attrs={"class":"textL"})	#class가 textL(학사일정)인 부분만 긁어온다
-		
-		res = str(allofsche[self.findIndex()].find("span"))
-		
-		#테그 제거
-		if res == "None":
-			res = str(allofsche[self.findIndex()])
-			res = res.replace('''<td class="textL"''', "")
-			res = res.replace("</td>", "")
-		else:
-			res = res.replace('''<span style="color:red">''', "")
-			res = res.replace("</span>", "")
-			res = res.replace("<span>", "")
-		res = res.replace("<", "")
-		res = res.replace(">", "")
-		return res
-		
-	def findIndex(self):	#학사일정을 저장해둔 list에 index를 계산해준다
-		if self.getMonth() >= 9 or self.getMonth() <= 2:
-			if self.getMonth() >= 9:
-				return (self.getMonth() - 9) + (self.getDate() - 1) * 6
-			if self.getMonth() <= 2:
-				return (self.getMonth() + 3) + (self.getDate() - 1) * 6
-		if self.getMonth() >= 3 or self.getMonth <= 8:
-			return (self.getMonth() - 6) + (self.getDate() - 1) * 6
+    locale = 'DAEJEON'
+    schType = 'MIDDLE'
+    region = {
+        'SEOUL': 'stu.sen.go.kr',
+        'INCHEON': 'stu.ice.go.kr',
+        'BUSAN': 'stu.pen.go.kr',
+        'GWANGJU': 'stu.gen.go.kr',
+        'DAEJEON': 'stu.dje.go.kr',
+        'DAEGU': 'stu.dge.go.kr',
+        'SEJONG': 'stu.sje.go.kr',
+        'ULSAN': 'stu.use.go.kr',
+        'GYEONGGI': 'stu.goe.go.kr',
+        'KANGWON': 'stu.kwe.go.kr',
+        'CHUNGBUK': 'stu.cbe.go.kr',
+        'CHUNGNAM': 'stu.cne.go.kr',
+        'GYEONGBUK': 'stu.gbe.go.kr',
+        'GYEONGNAM': 'stu.gne.go.kr',
+        'JEONBUK': 'stu.jbe.go.kr',
+        'JEONNAM': 'stu.jne.go.kr',
+        'JEJU': 'stu.jje.go.kr'
+    }
+
+    Type = {
+        'KINDERGARTEN': '1',  # 병설유치원
+        'ELEMENTARY': '2',  # 초등학교
+        'MIDDLE': '3',  # 중학교
+        'HIGH': '4'  # 고등학교
+    }
+
+    def __init__(self, schoolcode, locale, schType):
+        self.schoolcode = schoolcode  # 학교코드 설정
+        self.locale = locale
+        self.schType = schType
+
+    def getDate(self):
+        #	return datetime.today().day	#오늘 날짜
+        return 1
+
+    def getMonth(self):
+        #	return datetime.today().month #달
+        return 9
+
+    def getYear(self):
+        return datetime.today().year  # 연도
+
+    def parseCafeteria(self):
+        url = "http://" + self.region[
+            self.locale] + "/sts_sci_md00_001.do?schulCode=" + self.schoolcode + "&schulCrseScCode=" + self.Type[
+                  self.schType] + "&schulKndScCode=0" + self.Type[self.schType] + "&schMmealScCode=1"  # NEIS 학교급식 정보
+        r = requests.get(url)
+        soup = BeautifulSoup(r.text, "html.parser")
+
+        allofcafe = soup.find(id="contents")  # id가 content인 부분을 return
+        table = soup.find("table")  # table 태그부분을 return
+        tbody = table.find("tbody")  # tbody만 return
+        td = tbody.find_all("td")  # td(급식메뉴)속 값을 list로 받음
+        div = td[self.getDate() - 1].find_all("div")  # 오늘의 급식
+
+        res = str(div)
+        res = res.replace("<div>", "")  # 태그 제거
+        res = res.replace("</div>", "")
+        res = res.replace("<br/>", "\n")
+        return str(res[1:len(res) - 1])
+
+    def parseSchedule(self):
+        url = "http://" + self.region[
+            self.locale] + "/sts_sci_sf00_001.do?schulCode=" + self.schoolcode + "&schulCrseScCode=" + self.Type[
+                  self.schType] + "&schulKndScCode=0" + self.Type[self.schType] + "&ay=" + str(
+            self.getYear()) + "&" + "mm=" + str(self.getMonth()) + "&"  # 학사일정 링크
+        print(url)
+        r = requests.get(url)  # html코드를 불러온다
+        soup = BeautifulSoup(r.text, "html.parser")
+
+        allofsche = soup.find_all("td", attrs={"class": "textL"})  # class가 textL(학사일정)인 부분만 긁어온다
+
+        res = str(allofsche[self.findIndex()].find("span"))
+
+        # 테그 제거
+        if res == "None":
+            res = str(allofsche[self.findIndex()])
+            res = res.replace('''<td class="textL"''', "")
+            res = res.replace("</td>", "")
+        else:
+            res = res.replace('''<span style="color:red">''', "")
+            res = res.replace("</span>", "")
+            res = res.replace("<span>", "")
+        res = res.replace("<", "")
+        res = res.replace(">", "")
+        return res
+
+    def findIndex(self):  # 학사일정을 저장해둔 list에 index를 계산해준다
+        if self.getMonth() >= 9 or self.getMonth() <= 2:
+            if self.getMonth() >= 9:
+                return (self.getMonth() - 9) + (self.getDate() - 1) * 6
+            if self.getMonth() <= 2:
+                return (self.getMonth() + 3) + (self.getDate() - 1) * 6
+        if self.getMonth() >= 3 or self.getMonth <= 8:
+            return (self.getMonth() - 6) + (self.getDate() - 1) * 6
