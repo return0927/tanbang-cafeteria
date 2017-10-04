@@ -2,10 +2,13 @@ import tCafeteria
 
 funcSc = tCafeteria.tCafeteria("G100000202","DAEJEON","HIGH")
 #funcSc = tCafeteria.tCafeteria("G100000479", 'DAEJEON', 'MIDDLE')
+
+debug = False
+
 response = [
-    funcSc.parseCafeteria(),
-    funcSc.parseSchedule()
+    funcSc.parseCafeteria(return_all=debug),
+    funcSc.parseSchedule(return_all=debug)
 ]
 
-for _dict in response[0]:
-    print(_dict)
+print(response[0])
+print(response[1])
