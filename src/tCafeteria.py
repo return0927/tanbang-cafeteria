@@ -72,37 +72,22 @@ class tCafeteria:
             _Lunch = _TEMP[1:][:_INDEX]
             _Dinner = _TEMP[1:][_INDEX:]
             self.parseAlergic(_Lunch[1])
-            return {
-                "Date": _TEMP[0],
-                "Data": [
-                    {
-                        "type": "Lun",
-                        "data": [ self.parseAlergic(meal) for meal in _Lunch[1:]]
-                    },
-                    {
-                        "type": "Din",
-                        "data": [ self.parseAlergic(meal) for meal in _Dinner[1:]]
-                     }
-                ]
-            }
+
+            return _TEMP[0], True, [
+                [self.parseAlergic(meal) for meal in _Lunch[1:]],
+                [self.parseAlergic(meal) for meal in _Dinner[1:]]
+            ]
+
         else:
-            return {
-                "Date": _TEMP[0],
-                "Data": [
-                    {
-                        "type": "Lun",
-                        "data": [ self.parseAlergic(meal) for meal in _TEMP[1:][1:] ]
-                    }
-                ]
-            }
+            return _TEMP[0], False, [
+                [self.parseAlergic(meal) for meal in _TEMP[1:][1:]]
+            ]
 
-    def parseCafeteria(self, date=fetchDate() ):
+    def parseCafeteria(self, date=fetchDate(), return_all=False ):
         """
-            function arguments:
-            - date (Default: Now timestamp)
-
-            : `date` arg type formation
-            ['yyyy','m or mm','d or dd']
+        :param date: ['yyyy','m or mm','d or dd']
+        :param return_all: whether return all meals or not
+        :return: all meals dict or one meal string
         """
 
         _YEAR, _MONTH, _DAY = date
@@ -118,7 +103,6 @@ class tCafeteria:
                       _YEAR,
                       _MONTH
                   )
-            print(url)
             r = requests.get(url)
         except: # HTTP GET 오류 raise
             raise Exception("Error on getting server information")
@@ -126,43 +110,85 @@ class tCafeteria:
 
         try:
             res = soup.select("#contents > div > table > tbody > tr > td > div")
-            res = [ {"Date":tag.text, "Data":None} if tag.find("br") is None else self.makeValue(tag) for tag in res ]
+            retDict = {}
+            retDict[_YEAR] = {}; retDict[_YEAR][_MONTH] = {}
+
+            for tag in res:
+                if tag.find("br"):
+                    _day, _type, _meal = self.makeValue(tag)
+
+                    if _type:
+                        retDict[_YEAR][_MONTH][int(_day)] = {
+                            "lunch": _meal[0],
+                            "dinner": _meal[1]
+                        }
+                    else:
+                        retDict[_YEAR][_MONTH][int(_day)] = {
+                            "lunch": _meal[0]
+                        }
+                else:
+                    if tag.text.isdigit():
+                        retDict[_YEAR][_MONTH][int(tag.text)] = ['정보가 없습니다.','']
+                    else:
+                        pass
+
         except: # 파싱 오류 raise
             raise Exception("Error on parsing data")
 
-        return res
+        if return_all: return retDict
+        else:
+            if _DAY in retDict[_YEAR][_MONTH].keys():
+                return retDict[_YEAR][_MONTH][_DAY]
+            else:
+                return ['정보가 없습니다','']
 
-    def parseSchedule(self):
-        url = "http://" + self.region[
-            self.locale] + "/sts_sci_sf00_001.do?schulCode=" + self.schoolcode + "&schulCrseScCode=" + self.Type[
-                  self.schType] + "&schulKndScCode=0" + self.Type[self.schType] + "&ay=" + str(
-            self.getYear()) + "&" + "mm=" + str(self.getMonth()) + "&"  # 학사일정 링크
-        print(url)
+    def parseSchedule(self, date=fetchDate(), return_all=False):
+        """
+        :param date: ['yyyy','m or mm','d or dd']
+        :param return_all: whether return all schedule or not
+        :return: schedule dict or one schedule string
+        """
+
+        _YEAR, _MONTH, _DAY = date
+
+        url = "http://%s/sts_sci_sf00_001.do?schulCode=%s"\
+              "&schulCrseScCode=%s&schulKndScCode=0%s&ay=%d&mm=%d"
+
+        url = url % \
+              (
+                  self.region[self.locale],
+                  self.schoolcode,
+                  self.Type[self.schType],
+                  self.Type[self.schType],
+                  _YEAR,
+                  _MONTH
+              )
+
         r = requests.get(url)  # html코드를 불러온다
         soup = BeautifulSoup(r.text, "html.parser")
+        del r
 
-        allofsche = soup.find_all("td", attrs={"class": "textL"})  # class가 textL(학사일정)인 부분만 긁어온다
+        rows = soup.select("tr") # INDEX [0] 월 / [1:] 일정
+        schedules = {}
 
-        res = str(allofsche[self.findIndex()].find("span"))
+        months = [ tag.text for tag in rows[0].find_all("th", attrs={"colspan":"2"}) ]
+        months = [ int(x[:-1]) for x in months ]
+        docYear = soup.select_one("select#grade").text.strip() # 받아 온 문서 상의 연도
+        docYear = int(docYear)
+        schedules[docYear] = {}
 
-        # 테그 제거
-        if res == "None":
-            res = str(allofsche[self.findIndex()])
-            res = res.replace('''<td class="textL"''', "")
-            res = res.replace("</td>", "")
-        else:
-            res = res.replace('''<span style="color:red">''', "")
-            res = res.replace("</span>", "")
-            res = res.replace("<span>", "")
-        res = res.replace("<", "")
-        res = res.replace(">", "")
-        return res
+        for month in months:
+            schedules[docYear][month] = {} # 각 별로 딕셔너리 지정
 
-    def findIndex(self):  # 학사일정을 저장해둔 list에 index를 계산해준다
-        if self.getMonth() >= 9 or self.getMonth() <= 2:
-            if self.getMonth() >= 9:
-                return (self.getMonth() - 9) + (self.getDate() - 1) * 6
-            if self.getMonth() <= 2:
-                return (self.getMonth() + 3) + (self.getDate() - 1) * 6
-        if self.getMonth() >= 3 or self.getMonth() <= 8:
-            return (self.getMonth() - 6) + (self.getDate() - 1) * 6
+        for j in range(len(rows[1:])):
+            tr = rows[1:][j]
+            _legacy = [x.text.strip() for x in tr.find_all("td", attrs={"class": "textL"})] # 임시로 배열 저장
+            for n in range(len(months)):
+                try:
+                    schedules[docYear][months[n]][j+1] = _legacy[n] # 스케쥴 등록
+                except:
+                    raise Exception(schedules) # 에러 시 지금까지 모은 schedules 리턴
+
+        if return_all: return schedules
+        else: return schedules[_YEAR][_MONTH][_DAY]
+
