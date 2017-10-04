@@ -142,7 +142,9 @@ class tCafeteria:
                         }
                 else:
                     if tag.text.isdigit():
-                        retDict[_YEAR][_MONTH][int(tag.text)] = ['정보가 없습니다.','']
+                        retDict[_YEAR][_MONTH][int(tag.text)] = {
+                            "error": ['정보가 없습니다.','']
+                        }
                     else:
                         pass
 
@@ -154,7 +156,7 @@ class tCafeteria:
             if _DAY in retDict[_YEAR][_MONTH].keys():
                 return retDict[_YEAR][_MONTH][_DAY]
             else:
-                return ['정보가 없습니다','']
+                return {"error":['정보가 없습니다','']}
 
     def parseSchedule(self, date=fetchDate(), return_all=False):
         """
