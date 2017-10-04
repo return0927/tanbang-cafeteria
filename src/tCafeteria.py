@@ -58,23 +58,30 @@ class tCafeteria:
     def getYear(self):
         return datetime.today().year  # 연도
 
+    def parseAlergic(self, data):
+        p = re.compile("[0-9]+[.]") # 알레르기 표기 추출용 정규표현식
+        alg = "".join(p.findall(data)) # 정규표현식으로 알레르기 정보 추출
+        _temp = data.replace(alg, '')
+        return [_temp, alg] # 알레르기 정보가 없으면 alg는 ''를 리턴
+
     def makeValue(self, tag):
         _TEMP = str(tag)[5:-6].split("<br/>")
 
-        if "[석식]" in _TEMP[1:]:
+        if "[석식]" in _TEMP[1:]: # 석식이 있는지 확인
             _INDEX = _TEMP[1:].index("[석식]")
             _Lunch = _TEMP[1:][:_INDEX]
             _Dinner = _TEMP[1:][_INDEX:]
+            self.parseAlergic(_Lunch[1])
             return {
                 "Date": _TEMP[0],
                 "Data": [
                     {
                         "type": "Lun",
-                        "data": _Lunch[1:]
+                        "data": [ self.parseAlergic(meal) for meal in _Lunch[1:]]
                     },
                     {
                         "type": "Din",
-                        "data": _Dinner[1:]
+                        "data": [ self.parseAlergic(meal) for meal in _Dinner[1:]]
                      }
                 ]
             }
@@ -84,12 +91,10 @@ class tCafeteria:
                 "Data": [
                     {
                         "type": "Lun",
-                        "data": _TEMP[1:][1:]
+                        "data": [ self.parseAlergic(meal) for meal in _TEMP[1:][1:] ]
                     }
                 ]
             }
-
-        #return {"Date": _TEMP[0], "Data":""}
 
     def parseCafeteria(self, date=fetchDate() ):
         """
@@ -102,23 +107,27 @@ class tCafeteria:
 
         _YEAR, _MONTH, _DAY = date
         try:
-            url = "http://" + self.region[self.locale]\
-                  + "/sts_sci_md00_001.do?schulCode="\
-                  + self.schoolcode + "&schulCrseScCode="\
-                  + self.Type[self.schType]\
-                  + "&schulKndScCode=0"\
-                  + self.Type[self.schType]\
-                  + "&schMmealScCode=1"  # NEIS 학교급식 정보
+            url = "http://%s/sts_sci_md00_001.do?schulCode=%s&schulCrseScCode=%s" + \
+                  "&schulKndScCode=0%s&schMmealScCode=1&&ay=%d&mm=%d"
+            url = url%\
+                  (
+                      self.region[self.locale],
+                      self.schoolcode,
+                      self.Type[self.schType],
+                      self.Type[self.schType],
+                      _YEAR,
+                      _MONTH
+                  )
+            print(url)
             r = requests.get(url)
-        except:
+        except: # HTTP GET 오류 raise
             raise Exception("Error on getting server information")
-        print(url)
         soup = BeautifulSoup(r.text, "html.parser")
 
         try:
             res = soup.select("#contents > div > table > tbody > tr > td > div")
             res = [ {"Date":tag.text, "Data":None} if tag.find("br") is None else self.makeValue(tag) for tag in res ]
-        except:
+        except: # 파싱 오류 raise
             raise Exception("Error on parsing data")
 
         return res
