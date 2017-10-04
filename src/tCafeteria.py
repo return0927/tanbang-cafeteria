@@ -1,22 +1,36 @@
 # -*- coding: utf-8 -*- 
 
-# Copyright (c) 2017 w3bn00b
+# Copyright (c) 2017 w3bn00b, return0927
 # See the file LICENSE for copying permission.
 # tanbang-cafeteria v1.3
-# author : w3bn00b
+# started by : w3bn00b | re-arranged by : return0927
 # description : 중학교의 급식정보와 학사일정을 파싱해옵니다
 # Usage : cafe = tCafeteria("학교코드", "관할지역 코드")
 # Required library : datetime, bs4, requests
 
 from datetime import *
-from bs4 import BeautifulSoup
-import requests, re
+
+# 자동 설치 메소드
+try:
+    from bs4 import BeautifulSoup
+    import requests, re
+except ImportError:
+    try:
+        print("Auto Installing requests, bs4")
+        import pip
+        pip.main(['install','bs4'])
+        pip.main(['install','requests'])
+
+        import requests, re
+        from bs4 import BeautifulSoup
+    except:
+        raise ImportError("Error on importing modules")
 
 fetchDate = lambda: [datetime.today().year, datetime.today().month, datetime.today().day]
 
 class tCafeteria:
-    locale = 'DAEJEON'
-    schType = 'MIDDLE'
+    locale = None
+    schType = None
     region = {
         'SEOUL': 'stu.sen.go.kr',
         'INCHEON': 'stu.ice.go.kr',
