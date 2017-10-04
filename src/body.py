@@ -6,4 +6,6 @@ response = [
     funcSc.parseCafeteria(),
     funcSc.parseSchedule()
 ]
-print(response[0][9])
+
+for _dict in response[0]:
+    print(_dict)
