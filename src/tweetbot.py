@@ -12,3 +12,21 @@ except KeyError:
 		res = meal['lunch'][i][0] + " " + meal['lunch'][i][1]
 		print (res)
 
+consumerKey = ""
+consumerSecret = ""
+ 
+#auth.OAuthHandler 객체 반환
+auth = tweepy.OAuthHandler(consumerKey, consumerSecret)
+ 
+accessToken = ""
+accessTokenSecret = ""
+ 
+#auth.OAuthHandler r객체에 엑세스토큰 지정
+auth.set_access_token(accessToken, accessTokenSecret)
+ 
+#API 클래스의 인스턴스 반환 - 읽기, 트윗, 리트윗, DM
+api = tweepy.API(auth)
+ 
+#트윗포스트
+tweet = str(res)
+api.update_status(status=tweet)
