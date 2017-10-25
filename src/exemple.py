@@ -37,11 +37,7 @@ from tCafeteria import *
 
 cafe = tCafeteria("G100000479", 'DAEJEON', 'MIDDLE')	#탄방중 학교코드, 지역(대전), 학교 종류(중학교)
 res = cafe.parseCafeteria()
-w = open("./meal.txt", "w")
-meal = w.write(res)
-w.close()
+print (res)
 
 res = cafe.parseSchedule()
-w = open("./sche.txt", "w")
-sche = w.write(res)
-w.close()
+print (res)
