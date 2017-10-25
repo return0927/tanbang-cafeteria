@@ -63,15 +63,6 @@ class tCafeteria:
         self.locale = locale
         self.schType = schType
 
-    def getDate(self):
-        return datetime.today().day
-
-    def getMonth(self):
-        return datetime.today().month
-
-    def getYear(self):
-        return datetime.today().year  # 연도
-
     def parseAlergic(self, data):
         p = re.compile("[0-9]+[.]") # 알레르기 표기 추출용 정규표현식
         alg = "".join(p.findall(data)) # 정규표현식으로 알레르기 정보 추출
